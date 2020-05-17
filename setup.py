@@ -3,7 +3,11 @@
 
 """The setup script."""
 
-from setuptools import find_packages, setup
+from pathlib import Path
+
+from Cython.Build import cythonize
+from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -24,6 +28,7 @@ setup_requirements = [
 dev_requirements = [
     "bumpversion>=0.5.3",
     "coverage>=5.0a4",
+    "Cython",
     "flake8>=3.7.7",
     "ipython>=7.5.0",
     "m2r>=0.2.1",
@@ -60,6 +65,24 @@ extra_requirements = {
     ]
 }
 
+saxon_c_extension = [Extension("saxon_c",
+                               ["py_saxon_c/saxonc.pyx",
+                                "saxon_c/SaxonProcessor.cpp",
+                                "saxon_c/SaxonCGlue.c",
+                                "saxon_c/SaxonCXPath.c",
+                                "saxon_c/XdmValue.cpp",
+                                "saxon_c/XdmItem.cpp",
+                                "saxon_c/XdmNode.cpp",
+                                "saxon_c/XdmAtomicValue.cpp",
+                                "saxon_c/XsltProcessor.cpp",
+                                "saxon_c/Xslt30Processor.cpp",
+                                "saxon_c/XQueryProcessor.cpp",
+                                "saxon_c/XPathProcessor.cpp",
+                                "saxon_c/SchemaValidator.cpp"],
+                               language="c++",
+                               )
+                     ]
+
 setup(
     author="Jamie Sherman",
     author_email="jamies@alleninstitute.org",
@@ -72,12 +95,15 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    description="Friendly version of saxons python library that will be pip installable ",
+    description="Pip installable version of saxons python library",
     entry_points={
         "console_scripts": [
             "my_example=py_saxon_c.bin.my_example:main"
         ],
     },
+    ext_modules=cythonize(saxon_c_extension,
+                          cmdclass={'build_ext': build_ext},
+                          include_dirs=['jni', "jni/unix"]),
     install_requires=requirements,
     license="BSD license",
     long_description=readme,
