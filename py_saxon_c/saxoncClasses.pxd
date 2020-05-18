@@ -4,7 +4,7 @@ from libcpp.map cimport map
 
 
 
-cdef extern from "../SaxonProcessor.h":
+cdef extern from "../saxon_c/SaxonProcessor.h":
     cdef cppclass SaxonProcessor:
         SaxonProcessor(bool) except +
         #SaxonProcessor(const char * configFile) except +
@@ -20,15 +20,15 @@ cdef extern from "../SaxonProcessor.h":
 
         #set saxon resources directory
         void setResourcesDirectory(const char* dir)
-        
+
         #get saxon resources directory
         const char * getResourcesDirectory()
 
-        #Set a configuration property specific to the processor in use. 
+        #Set a configuration property specific to the processor in use.
         #Properties specified here are common across all the processors.
         void setConfigurationProperty(char * name, char * value)
 
-        #Clear configuration properties specific to the processor in use. 
+        #Clear configuration properties specific to the processor in use.
         void clearConfigurationProperties()
 
         bool isSchemaAware()
@@ -107,7 +107,7 @@ cdef extern from "../SaxonProcessor.h":
         XdmValue * getXslMessages()
 
         void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)
-        
+
         char * transformFileToString(const char* sourcefile, const char* stylesheetfile)
 
         XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)
@@ -137,7 +137,7 @@ cdef extern from "../SaxonProcessor.h":
         const char* checkException()
 
         void exceptionClear()
-    
+
         int exceptionCount()
 
         const char * getErrorMessage(int)
@@ -313,7 +313,7 @@ cdef extern from "../SaxonProcessor.h":
         void setOutputFile(const char * outputFile)
 
         void validate(const char * sourceFile) except +
-   
+
         XdmNode * validateToNode(const char * sourceFile) except +
 
         void setSourceNode(XdmNode * source)
@@ -338,9 +338,9 @@ cdef extern from "../SaxonProcessor.h":
 
         int exceptionCount()
 
-    
+
         const char * getErrorMessage(int i)
-     
+
         const char * getErrorCode(int i)
 
         void setLax(bool l)
@@ -351,14 +351,14 @@ cdef extern from "../SaxonProcessor.h":
         void setBaseURI(const char * uriStr)
 
         XdmValue * evaluate(const char * xpathStr)
-   
+
         XdmItem * evaluateSingle(const char * xpathStr)
 
         void setContextItem(XdmItem * item)
-        
+
         void setcwd(const char* cwd)
 
-        void setContextFile(const char * filename) 
+        void setContextFile(const char * filename)
 
         bool effectiveBooleanValue(const char * xpathStr)
 
@@ -393,7 +393,7 @@ cdef extern from "../SaxonProcessor.h":
 
         void setOutputFile(const char* outfile)
 
-        void setContextItemFromFile(const char * filename) 
+        void setContextItemFromFile(const char * filename)
 
         void setParameter(const char * name, XdmValue*value)
 

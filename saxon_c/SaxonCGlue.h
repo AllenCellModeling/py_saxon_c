@@ -6,9 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef SAXONCGLUE_H 
+#ifndef SAXONCGLUE_H
 #define SAXONCGLUE_H
-#include "jni/jni.h"
+#include "../jni/jni.h"
 
 
 #if defined __linux__ || defined __APPLE__
@@ -37,7 +37,7 @@
 #ifndef __cplusplus
 #ifndef _BOOL
 #include <stdbool.h>
-/*typedef unsigned char sxn_bool; 
+/*typedef unsigned char sxn_bool;
 static const sxn_bool sxn_false = 0;
 static const sxn_bool sxn_true = 1;*/
 
@@ -46,11 +46,11 @@ static const sxn_bool sxn_true = 1;*/
 static const bool false = 0;
 static const bool true = 1;
 #endif
-#endif 
+#endif
 
 
 
-#ifndef __cplusplus 
+#ifndef __cplusplus
 	#if defined(LICENSE)
 		#define sxn_license 1
 	#else
@@ -134,7 +134,7 @@ char * getResourceDirectory();
 char * _getResourceDirectory();
 
 /*
-* Set Dll name. Also set the saxon resources directory. 
+* Set Dll name. Also set the saxon resources directory.
 * If the SAXON_HOME environmental variable is set then use that as base.
 */
 void setDllname();
@@ -158,7 +158,7 @@ extern jint (JNICALL * JNI_GetDefaultJavaVMInitArgs_func) (void *args);
 extern jint (JNICALL * JNI_CreateJavaVM_func) (JavaVM **pvm, void **penv, void *args);
 
 /*
- * Initialize JET run-time with simplified method. The initJavaRT method will be called 
+ * Initialize JET run-time with simplified method. The initJavaRT method will be called
  * with the arguments expanded from environ
  * @param environ - the Evironment is passed
  */
@@ -209,40 +209,40 @@ jobject createSaxonProcessor (JNIEnv* penv, jclass myClassInDll, const char * ar
 jobject createSaxonProcessor2 (JNIEnv* penv, jclass myClassInDll, const char * arguments, jobject argument1);
 
 /*
- * Callback to check for exceptions. When called it returns the exception as a string 
+ * Callback to check for exceptions. When called it returns the exception as a string
  */
 const char * checkForException(sxnc_environment *environi, jobject callingObject);
 
 /*
- * Clean up and destroy Java VM to release memory used. 
+ * Clean up and destroy Java VM to release memory used.
  */
 void finalizeJavaRT (JavaVM* jvm);
 
 
 /*
- * Get a parameter from list 
+ * Get a parameter from list
  */
 jobject getParameter(sxnc_parameter *parameters,  int parLen, const char* namespacei, const char * name);
 
 /*
- * Get a property from list 
+ * Get a property from list
  */
 char* getProperty(sxnc_property * properties, int propLen, const char* namespacei, const char * name);
 
 
 /*
- * set a parameter 
+ * set a parameter
  */
 void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap, const char * namespacei, const char * name, jobject value);
 
 
 /*
- * set a property 
+ * set a property
  */
 void setProperty(sxnc_property ** properties, int *propLen, int *propCap, const char* name, const char* value);
 
 /*
- * clear parameter 
+ * clear parameter
  */
 void clearSettings(sxnc_parameter **parameters, int *parLen, sxnc_property ** properties, int *propLen);
 

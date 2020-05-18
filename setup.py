@@ -9,6 +9,12 @@ from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 
+# from distutils.core import setup
+# from distutils.extension import Extension
+# from Cython.Distutils import build_ext
+# from Cython.Build import cythonize
+
+
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
@@ -28,7 +34,6 @@ setup_requirements = [
 dev_requirements = [
     "bumpversion>=0.5.3",
     "coverage>=5.0a4",
-    "Cython",
     "flake8>=3.7.7",
     "ipython>=7.5.0",
     "m2r>=0.2.1",
@@ -49,7 +54,7 @@ interactive_requirements = [
     "matplotlib",
 ]
 
-requirements = []
+requirements = ["Cython"]
 
 extra_requirements = {
     "test": test_requirements,
@@ -100,10 +105,10 @@ setup(
         "console_scripts": [
             "my_example=py_saxon_c.bin.my_example:main"
         ],
-    },
-    ext_modules=cythonize(saxon_c_extension,
-                          cmdclass={'build_ext': build_ext},
-                          include_dirs=['jni', "jni/unix"]),
+    },  #
+    ext_modules=cythonize(saxon_c_extension, language_level="3"),
+    cmdclass={'build_ext': build_ext},
+    include_dirs=['jni', "jni/unix"],
     install_requires=requirements,
     license="BSD license",
     long_description=readme,
