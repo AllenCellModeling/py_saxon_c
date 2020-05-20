@@ -13,7 +13,7 @@ from py_saxon_c cimport saxoncClasses
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
-from nodekind import *
+from py_saxon_c.nodekind import *
 from os.path import isfile
 
 cdef const char * make_c_str(str str_value):

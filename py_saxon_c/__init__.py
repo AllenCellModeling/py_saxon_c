@@ -13,4 +13,7 @@ def get_module_version():
     return __version__
 
 
-from .example import Example  # noqa: F401
+from saxon_c import *  # noqa: F401
+
+from .nodekind import *  # noqa: F401
+# from .example import Example  # noqa: F401
