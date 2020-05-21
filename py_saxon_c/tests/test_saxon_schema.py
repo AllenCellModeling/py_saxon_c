@@ -1,6 +1,6 @@
 from tempfile import mkstemp
 import pytest
-from saxonc import *
+from py_saxon_c import *
 import os
 
 
@@ -30,7 +30,7 @@ def testValidator2(saxonproc2):
 def testValdiator3(saxonproc2):
     saxonproc2.set_configuration_property("xsdversion", "1.1")
     val = saxonproc2.new_schema_validator()
-    
+
     val.register_schema(xsd_file="family-ext.xsd")
 
     val.register_schema(xsd_file="family.xsd")

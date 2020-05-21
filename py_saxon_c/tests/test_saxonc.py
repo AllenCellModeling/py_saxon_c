@@ -1,6 +1,6 @@
 from tempfile import mkstemp
 import pytest
-from saxonc import *
+from py_saxon_c import *
 import os
 from os.path import isfile
 
@@ -160,7 +160,7 @@ def test_version():
     """SaxonProcessor version string content"""
     sp = PySaxonProcessor()
     ver = sp.version
-    
+
     assert ver.startswith('Saxon/C ')
     assert ver.endswith('from Saxonica')
 
@@ -267,7 +267,7 @@ def testContextNotRootNamedTemplate(saxonproc, files_dir):
 
     trans = saxonproc.new_xslt30_processor()
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
-    trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>")      
+    trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>")
     trans.set_global_context_item(xdm_item=input_)
     result = trans.call_template_returning_value("main")
     assert result is not None
@@ -277,7 +277,7 @@ def testContextNotRootNamedTemplate(saxonproc, files_dir):
     assert "[]" in result2
 
 
-  
+
 def testUseAssociated(saxonproc, files_dir):
 
     trans = saxonproc.new_xslt30_processor()
@@ -319,7 +319,7 @@ def testXdmDestinationWithItemSeparator(saxonproc):
 
 
 def testPipeline(saxonproc):
-    stage1 = saxonproc.new_xslt30_processor()        
+    stage1 = saxonproc.new_xslt30_processor()
     xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>"
     xml = "<z/>"
     stage1.compile_stylesheet(stylesheet_text=xsl)
@@ -340,7 +340,7 @@ def testPipeline(saxonproc):
     stage1.set_initial_match_selection(xdm_value=in_)
     d1 = stage1.apply_templates_returning_value()
 
-    assert d1 is not None    
+    assert d1 is not None
     stage2.set_property("!omit-xml-declaration", "yes")
     stage2.set_property("!indent", "no")
     stage2.set_initial_match_selection(xdm_value=d1)
@@ -366,7 +366,7 @@ def testPipeline(saxonproc):
 
 
 def testPipelineShort(saxonproc):
-    
+
     xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template></xsl:stylesheet>"
     xml = "<z/>"
     stage1 = saxonproc.new_xslt30_processor()
@@ -387,7 +387,7 @@ def testPipelineShort(saxonproc):
     assert "<a><a><z/></a></a>" in sw
 
 def testCallFunction(saxonproc):
-  
+
     source = "<?xml version='1.0'?><xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  xmlns:f='http://localhost/'  version='3.0'>  <xsl:function name='f:add' visibility='public'>    <xsl:param name='a'/><xsl:param name='b'/>   <xsl:sequence select='$a + $b'/></xsl:function>  </xsl:stylesheet>"
     trans = saxonproc.new_xslt30_processor()
 
@@ -395,11 +395,11 @@ def testCallFunction(saxonproc):
     paramArr = [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)]
     v = trans.call_function_returning_value("{http://localhost/}add", paramArr)
     assert isinstance(v.head, PyXdmItem)
-    assert v.head.is_atomic		
+    assert v.head.is_atomic
     assert v.head.get_atomic_value().integer_value ==5
     trans.clear_parameters()
-        
-  
+
+
 def testCallFunctionArgConversion(saxonproc):
     trans = saxonproc.new_xslt30_processor()
 
@@ -409,14 +409,14 @@ def testCallFunctionArgConversion(saxonproc):
 
     v = trans.call_function_returning_value("{http://localhost/}add", [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)])
     assert isinstance(v.head, PyXdmItem)
-    assert v.head.is_atomic		
+    assert v.head.is_atomic
     assert v.head.get_atomic_value().double_value == 5.0e0
     ''' assert ("double", $v.head.get_atomic_value()->getPrimitiveTypeName()
     '''
 
 
 def testCallFunctionWrapResults(saxonproc):
-       
+
     trans = saxonproc.new_xslt30_processor()
 
     source = "<?xml version='1.0'?><xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'  xmlns:f='http://localhost/'  version='3.0'> <xsl:param name='x' as='xs:integer'/>  <xsl:param name='y' select='.+2'/>  <xsl:function name='f:add' visibility='public'>  <xsl:param name='a' as='xs:double'/> <xsl:param name='b' as='xs:double'/> <xsl:sequence select='$a + $b + $x + $y'/> </xsl:function> </xsl:stylesheet>"
@@ -431,7 +431,7 @@ def testCallFunctionWrapResults(saxonproc):
     assert sw is not None
     assert "57" in sw
     trans.clear_parameters()
-    
+
 
 
 
@@ -443,12 +443,12 @@ def testCallFunctionArgInvalid(saxonproc):
     trans.compile_stylesheet(stylesheet_text=source)
     argArr = [saxonproc.make_integer_value(2), saxonproc.make_integer_value(3)]
     v = trans.call_function_returning_value("{http://localhost/}add", argArr)
-            
+
     assert trans.exception_count()==1
     assert "Cannot invoke function add#2 externally" in trans.get_error_message(0)
     assert v is None
     trans.clear_parameters()
-    
+
 
 
 def testCallNamedTemplateWithTunnelParams(saxonproc):
@@ -465,7 +465,7 @@ def testCallNamedTemplateWithTunnelParams(saxonproc):
     sw = trans.call_template_returning_string("t")
     assert sw is not None
     assert "17" in sw
-        
+
 
 def testCallTemplateRuleWithParams(saxonproc):
     trans = saxonproc.new_xslt30_processor()
@@ -481,7 +481,7 @@ def testCallTemplateRuleWithParams(saxonproc):
     sw = trans.apply_templates_returning_string()
     sw is not None
     assert "e 17" in sw
-   
+
 
 def testApplyTemplatesToXdm(saxonproc):
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  <xsl:template match='*'>     <xsl:param name='a' as='xs:double'/>     <xsl:param name='b' as='xs:float'/>     <xsl:sequence select='., $a + $b'/>  </xsl:template>  </xsl:stylesheet>"
@@ -500,9 +500,9 @@ def testApplyTemplatesToXdm(saxonproc):
     assert first.is_atomic == False
     assert "e" in first.get_node_value().name
     second = result.item_at(1)
-    assert second.is_atomic            
+    assert second.is_atomic
     assert second.get_atomic_value().double_value == 17.0
-    
+
 
 
 def testResultDocument(saxonproc):
@@ -514,7 +514,7 @@ def testResultDocument(saxonproc):
     xdmValue = trans.apply_templates_returning_value()
 
     assert xdmValue.size == 1
-    
+
 
 
 
@@ -542,9 +542,9 @@ def testCallTemplateWithResultValidation(files_dir):
     trans.compile_stylesheet(stylesheet_text=source)
     trans.set_property("!omit-xml-declaration", "yes")
     sw = trans.call_template_returning_string("main")
-    assert sw is not None 
+    assert sw is not None
     assert "<x>3</x>" == sw
-     
+
 
 
 
@@ -558,7 +558,7 @@ def testCallTemplateNoParamsRaw(saxonproc):
     assert result.head is not None
     assert result.head.is_atomic == True
     assert result.head.get_atomic_value().integer_value == 42
-        
+
 
 
 
@@ -577,7 +577,7 @@ def testCallNamedTemplateWithParamsRaw(saxonproc):
     assert val.item_at(0).is_atomic
     assert val.item_at(0).get_atomic_value().integer_value == 13
     assert val.item_at(1).get_atomic_value().integer_value == 6
-       
+
 
 def testApplyTemplatesRaw(saxonproc):
     trans = saxonproc.new_xslt30_processor()
@@ -602,7 +602,7 @@ def testApplyTemplatesRaw(saxonproc):
     assert second is not None
     assert second.is_atomic
     assert second.get_atomic_value().double_value == 17.0
-        
+
 
 
 def testApplyTemplatesToSerializer(saxonproc):
@@ -615,15 +615,15 @@ def testApplyTemplatesToSerializer(saxonproc):
     trans.set_result_as_raw_value(True)
     paramArr = {"a":saxonproc.make_integer_value(12), "b":saxonproc.make_integer_value(5)}
     trans.set_initial_template_parameters(False, paramArr)
-  
+
     trans.set_initial_match_selection(xdm_value=saxonproc.make_integer_value(16))
     sw = trans.apply_templates_returning_string()
 
     assert "16~~17" == sw
- 
 
 
-    
+
+
 ''' PyXQueryProcessor '''
 
 def test_return_document_node(saxonproc):
@@ -653,7 +653,7 @@ def testxQuery1(saxonproc, data_dir):
     node = saxonproc.parse_xml(xml_file_name='catOutput.xml')
     xp = saxonproc.new_xpath_processor()
     xp.set_context(xdm_item=node)
-    assert xp.effective_boolean_value("/out/text()=3")    
+    assert xp.effective_boolean_value("/out/text()=3")
     if os.path.exists('catOutput.xml'):
         os.remove("catOutput.xml")
 
@@ -667,7 +667,7 @@ def test_default_namespace(saxonproc):
 
     value = query_proc.run_query_to_value()
 
-    assert value.size == 1 
+    assert value.size == 1
 
 
 def test_XQuery_line_number():
@@ -675,7 +675,7 @@ def test_XQuery_line_number():
     proc = PySaxonProcessor(True)
     proc.set_configuration_property("l", "on")
     query_proc = proc.new_xquery_processor()
-    
+
     query_proc.set_property("s", "cat.xml")
     query_proc.declare_namespace("saxon","http://saxon.sf.net/")
 
@@ -683,7 +683,7 @@ def test_XQuery_line_number():
 
     result = query_proc.run_query_to_string()
     assert result == None
-    
+
 
 def testReusability(saxonproc):
     queryproc = saxonproc.new_xquery_processor()
@@ -699,22 +699,22 @@ def testReusability(saxonproc):
     value1 = saxonproc.make_boolean_value(True)
     queryproc.set_parameter("p",value1)
     result = queryproc.run_query_to_value()
-       
+
     assert result is not None
     assert result.is_atomic
     assert result.boolean_value
 
     queryproc.clear_parameters()
-    queryproc.clear_properties()    
-    
+    queryproc.clear_properties()
+
     queryproc.declare_namespace("", "http://two.uri")
     queryproc.set_query_content("declare variable $p as xs:integer external; /*/bar + $p")
-    
+
     queryproc.set_context(xdm_item=input_)
 
     value2 = saxonproc.make_long_value(6)
     queryproc.set_parameter("p",value2)
-        
+
     result2 = queryproc.run_query_to_value()
     assert result2.integer_value == 18
 
@@ -755,11 +755,11 @@ def test_node_list():
     </out>
     """
     sp = PySaxonProcessor()
-    
+
     node = sp.parse_xml(xml_text=xml)
     outNode = node.children[0]
     children = outNode.children
-    personData = str(children)    
+    personData = str(children)
     assert ('<person att1' in personData)
 
 
@@ -767,7 +767,7 @@ def test_node_list():
 def parse_xml_file():
 
     sp = PySaxonProcessor()
-    
+
     node = sp.parse_xml(xml_file_name='cat.xml')
     outNode = node.children[0]
     assert outNode.name == 'out'
@@ -782,18 +782,18 @@ def test_node():
     </out>
     """
     sp = PySaxonProcessor()
-    
+
     node = sp.parse_xml(xml_text=xml)
-    assert node.node_kind == 9    
+    assert node.node_kind == 9
     assert node.size == 1
     outNode = node.children[0]
     assert outNode.name == 'out'
     assert outNode.node_kind == ELEMENT
-    children = outNode.children    
+    children = outNode.children
     attrs = children[1].attributes
     assert len(attrs) == 2
     assert children[1].get_attribute_value('att2') == 'value2'
-    assert 'value2' in attrs[1].string_value 
+    assert 'value2' in attrs[1].string_value
 
 
 def test_evaluate():
@@ -806,14 +806,14 @@ def test_evaluate():
     """
     sp = PySaxonProcessor()
     xp = sp.new_xpath_processor()
-    
+
     node = sp.parse_xml(xml_text=xml)
     assert isinstance(node, PyXdmNode)
     xp.set_context(xdm_item=node)
     value = xp.evaluate('//person')
     assert isinstance(value, PyXdmValue)
     assert value.size == 3
-    
+
 
 def test_single():
     xml = """\
@@ -825,7 +825,7 @@ def test_single():
     """
     sp = PySaxonProcessor()
     xp = sp.new_xpath_processor()
-    
+
     node = sp.parse_xml(xml_text=xml)
     assert isinstance(node, PyXdmNode)
     xp.set_context(xdm_item=node)
