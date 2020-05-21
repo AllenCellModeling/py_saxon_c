@@ -435,7 +435,7 @@ cdef extern from "../saxon_c/SaxonProcessor.h":
         const char * getErrorCode(int i)
 
 
-cdef extern from "../XdmValue.h":
+cdef extern from "../saxon_c/XdmValue.h":
     cdef cppclass XdmValue:
         XdmValue() except +
 
@@ -458,13 +458,13 @@ cdef extern from "../XdmValue.h":
 
         int getType()
 
-cdef extern from "../XdmItem.h":
+cdef extern from "../saxon_c/XdmItem.h":
     cdef cppclass XdmItem(XdmValue):
         XdmItem() except +
         const char * getStringValue()
         bool isAtomic()
 
-cdef extern from "../XdmNode.h":
+cdef extern from "../saxon_c/XdmNode.h":
     cdef cppclass XdmNode(XdmItem):
         bool isAtomic()
 
@@ -490,7 +490,7 @@ cdef extern from "../XdmNode.h":
         int getChildCount()
 
 
-cdef extern from "../XdmAtomicValue.h":
+cdef extern from "../saxon_c/XdmAtomicValue.h":
     cdef cppclass XdmAtomicValue(XdmItem):
         XdmAtomicValue() except +
 
