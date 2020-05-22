@@ -14,9 +14,6 @@ def saxonproc():
 def files_dir():
     return "../../samples/php"
 
-@pytest.fixture
-def data_dir():
-    return "../../samples/data/"
 
 def test_create_bool():
     """Create SaxonProcessor object with a boolean argument"""
@@ -171,8 +168,8 @@ def test_version():
 def test_xslt_processor(data_dir):
     sp = PySaxonProcessor()
     xsltproc = sp.new_xslt_processor()
-    xmlFile = data_dir + "cat.xml"
-    node_ = sp.parse_xml(xml_file_name=xmlFile)
+    xmlFile = data_dir / "cat.xml"
+    node_ = sp.parse_xml(xml_file_name=str(xmlFile))
     xsltproc.set_source(xdm_node=node_)
     xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
     output2 = xsltproc.transform_to_string()
@@ -180,26 +177,30 @@ def test_xslt_processor(data_dir):
 
 def test_Xslt_from_file(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt_processor()
-    xmlFile = data_dir+'cat.xml'
-    result = xsltproc.transform_to_string(source_file=data_dir+'cat.xml', stylesheet_file=data_dir+'test.xsl')
+    xmlFile = data_dir /'cat.xml'
+    result = xsltproc.transform_to_string(source_file=str(data_dir / 'cat.xml'),
+                                          stylesheet_file=str(data_dir / 'test.xsl'))
     assert result is not None
     assert 'text3' in result
 
 
 def test_Xslt_from_file2(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt_processor()
-    xmlFile = data_dir+'cat.xml'
-    result = xsltproc.transform_to_string(source_file=data_dir+'cat.xml', stylesheet_file=data_dir+'test.xsl')
+    xmlFile = data_dir /'cat.xml'
+    result = xsltproc.transform_to_string(source_file=str(data_dir / 'cat.xml'),
+                                          stylesheet_file=str(data_dir / 'test.xsl'))
     assert result is not None
     assert 'text3' in result
 
 
 def test_Xslt_from_file_error(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt_processor()
-    result = xsltproc.transform_to_value(source_file=data_dir+'cat.xml', stylesheet_file=data_dir+'test-error.xsl')
+    result = xsltproc.transform_to_value(source_file=str(data_dir/'cat.xml'),
+                                         stylesheet_file=str(data_dir/'test-error.xsl'))
     assert result is None
     assert xsltproc.exception_occurred()
     assert xsltproc.exception_count() == 1
+
 
 def test_xslt_parameter(saxonproc, data_dir):
     input_ = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
@@ -209,7 +210,7 @@ def test_xslt_parameter(saxonproc, data_dir):
     assert value1 is not None
 
     trans.set_source(xdm_node=input_)
-    output_ = trans.transform_to_string(stylesheet_file=data_dir+"test.xsl")
+    output_ = trans.transform_to_string(stylesheet_file=str(data_dir / "test.xsl"))
     assert 'text2' in output_
 
 
@@ -233,22 +234,22 @@ def testContextNotRoot(saxonproc):
     assert "[" in result
 
 
-def testResolveUri(saxonproc):
-    trans = saxonproc.new_xslt30_processor()
-    trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='$uri'/><xsl:result-document href='{$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'\$err:code: ' || $err:code  || ', $err:description: ' || $err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>")
-
-    value = trans.call_template_returning_value("go")
-    assert value is not None
-    item = value.head
-    assert "code" in item.string_value
+# def testResolveUri(saxonproc):
+#     trans = saxonproc.new_xslt30_processor()
+#     trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='$uri'/><xsl:result-document href='{$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'\$err:code: ' || $err:code  || ', $err:description: ' || $err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>")
+#
+#     value = trans.call_template_returning_value("go")
+#     assert value is not None
+#     item = value.head
+#     assert "code" in item.string_value
 
 
 def testEmbeddedStylesheet(saxonproc, data_dir):
     trans = saxonproc.new_xslt30_processor()
-    input_ = saxonproc.parse_xml(xml_file_name=data_dir+"books.xml")
+    input_ = saxonproc.parse_xml(xml_file_name=str(data_dir / "books.xml"))
     path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')"
 
-    print(data_dir+"books.xml")
+    print(data_dir / "books.xml")
 
     xPathProcessor = saxonproc.new_xpath_processor()
     xPathProcessor.set_context(xdm_item=input_)
@@ -257,14 +258,14 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
     href = hrefval.string_value
     print("href="+href)
     assert href != ""
-    trans.compile_stylesheet(stylesheet_file=data_dir+href)
+    trans.compile_stylesheet(stylesheet_file=str(data_dir / href))
 
     assert isinstance(input_, PyXdmNode)
     node = trans.transform_to_value(xdm_node=input_)
     assert node is not None
 
-def testContextNotRootNamedTemplate(saxonproc, files_dir):
 
+def testContextNotRootNamedTemplate(saxonproc, files_dir):
     trans = saxonproc.new_xslt30_processor()
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>")
@@ -277,13 +278,11 @@ def testContextNotRootNamedTemplate(saxonproc, files_dir):
     assert "[]" in result2
 
 
-
-def testUseAssociated(saxonproc, files_dir):
-
+def testUseAssociated(saxonproc, data_dir):
     trans = saxonproc.new_xslt30_processor()
-    foo_xml = files_dir+"/trax/xml/foo.xml"
-    trans.compile_stylesheet(associated_file=foo_xml)
-    trans.set_initial_match_selection(file_name=foo_xml)
+    foo_xml = data_dir / "foo.xml"
+    trans.compile_stylesheet(associated_file=str(foo_xml))
+    trans.set_initial_match_selection(file_name=str(foo_xml))
     result = trans.apply_templates_returning_string()
     assert result is not None
 
@@ -519,31 +518,32 @@ def testResultDocument(saxonproc):
 
 
 
-def testApplyTemplatesToFile(saxonproc):
+def testApplyTemplatesToFile(saxonproc, data_dir):
 
     xsl = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>  <xsl:template match='a'> <c>d</c>  </xsl:template></xsl:stylesheet>"
     trans = saxonproc.new_xslt30_processor()
     trans.compile_stylesheet(stylesheet_text=xsl)
     in_put = saxonproc.parse_xml(xml_text="<a>b</a>")
-    trans.set_output_file("output123.xml")
+    out_put = data_dir / "output123.xml"
+    trans.set_output_file(str(out_put))
     trans.set_initial_match_selection(xdm_value=in_put)
-    trans.apply_templates_returning_file(output_file="output123.xml")
-    assert isfile("output123.xml") == True
+    trans.apply_templates_returning_file(output_file=str(out_put))
+    assert out_put.exists()
 
 
-'''@pytest.mark.skip('Test can only run with a license file present')'''
-def testCallTemplateWithResultValidation(files_dir):
-    saxonproc2 =  PySaxonProcessor(True)
-    saxonproc2.set_cwd(files_dir)
-    trans = saxonproc2.new_xslt30_processor()
-
-    source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0' exclude-result-prefixes='#all'>  <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema>  <xsl:template name='main'>     <xsl:result-document validation='strict'>       <x>3</x>     </xsl:result-document>  </xsl:template>  </xsl:stylesheet>"
-
-    trans.compile_stylesheet(stylesheet_text=source)
-    trans.set_property("!omit-xml-declaration", "yes")
-    sw = trans.call_template_returning_string("main")
-    assert sw is not None
-    assert "<x>3</x>" == sw
+# '''@pytest.mark.skip('Test can only run with a license file present')'''
+# def testCallTemplateWithResultValidation(data_dir):
+#     saxonproc2 = PySaxonProcessor(True)
+#     saxonproc2.set_cwd(str(data_dir))
+#     trans = saxonproc2.new_xslt30_processor()
+#
+#     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0' exclude-result-prefixes='#all'>  <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema>  <xsl:template name='main'>     <xsl:result-document validation='strict'>       <x>3</x>     </xsl:result-document>  </xsl:template>  </xsl:stylesheet>"
+#
+#     trans.compile_stylesheet(stylesheet_text=source)
+#     trans.set_property("!omit-xml-declaration", "yes")
+#     sw = trans.call_template_returning_string("main")
+#     assert sw is not None
+#     assert "<x>3</x>" == sw
 
 
 
@@ -639,8 +639,8 @@ def testxQuery1(saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
     query_proc.clear_properties()
     query_proc.clear_parameters()
-    xmlFile = data_dir+"cat.xml"
-    query_proc.set_property("s", xmlFile)
+    xmlFile = data_dir / "cat.xml"
+    query_proc.set_property("s", str(xmlFile))
 
     query_proc.set_property("qs", "<out>{count(/out/person)}</out>")
 
@@ -719,7 +719,6 @@ def testReusability(saxonproc):
     assert result2.integer_value == 18
 
 
-
 '''PyXPathProcessor test cases'''
 
 
@@ -727,9 +726,9 @@ def test_xpath_proc(saxonproc, data_dir):
 
     sp = saxonproc
     xp = saxonproc.new_xpath_processor()
-    xmlFile = data_dir+"cat.xml"
-    assert isfile(xmlFile)
-    xp.set_context(file_name=xmlFile)
+    xmlFile = data_dir / "cat.xml"
+    assert xmlFile.is_file()
+    xp.set_context(file_name=str(xmlFile))
     assert xp.effective_boolean_value('count(//person) = 3')
     assert not xp.effective_boolean_value("/out/person/text() = 'text'")
 
